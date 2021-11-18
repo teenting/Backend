@@ -1,12 +1,12 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
 from django.urls.resolvers import _PATH_PARAMETER_COMPONENT_RE
-from ttAccount.models import User, Family
+from ttAccount.models import User
 from datetime import datetime
 # Create your models here.
 
 class Mission(models.Model):
-    family = models.ForeignKey(Family, on_delete=CASCADE, related_name='mission_family')
+    child = models.ForeignKey(User, on_delete=CASCADE, related_name='mission')
     begDate = models.DateTimeField(default=datetime.now)
     expDate = models.DateTimeField(default=datetime.now)
     isFinished = models.BooleanField(default=False)
@@ -31,4 +31,4 @@ class Achievement(models.Model):
     )
     child = models.OneToOneField(User, on_delete=CASCADE, related_name='achievement_child')
     level = models.IntegerField(choices=LEVEL_CHOICES)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0)
