@@ -9,7 +9,7 @@ from django.core import validators
 
 # 분석 모델
 class Analysis(models.Model) :
-    child = models.ForeignKey(User, on_delete=CASCADE, default=1)
+    child = models.ForeignKey(Child, on_delete=CASCADE, default=1)
     trdd = models.CharField(max_length=8) # 거래날짜
     txtm = models.CharField(max_length=6) # 거래시간
     mnrcDrotDsnc = models.IntegerField(validators=[validators.MinValueValidator(1), validators.MaxValueValidator(4)]) # 1,2는 입금 / 3,4는 출금
@@ -24,3 +24,6 @@ class Analysis(models.Model) :
         (3, "기타")
     )
     category = models.IntegerField(default=0, choices=CATEGORIIES)
+
+    def __str__(self):
+        return self.tuno
