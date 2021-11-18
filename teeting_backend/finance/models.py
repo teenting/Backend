@@ -9,7 +9,6 @@ from django.core import validators
 
 # 분석 모델
 class Analysis(models.Model) :
-    # family = models.ForeignKey(Family, on_delete=CASCADE, default=1)
     child = models.ForeignKey(User, on_delete=CASCADE, default=1)
     trdd = models.CharField(max_length=8) # 거래날짜
     txtm = models.CharField(max_length=6) # 거래시간
