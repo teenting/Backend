@@ -47,6 +47,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_auth',
     'rest_framework.authtoken',
+
+    'django.contrib.sites', #회원가입
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_auth.registration',
+
 ]
 
 MIDDLEWARE = [

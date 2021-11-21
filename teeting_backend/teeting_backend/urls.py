@@ -23,8 +23,8 @@ from assignment import urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include("rest_framework.urls")),
-    path('api/rest-auth/', include('rest_auth.urls')),
-    path('assignment/', include('assignment.urls')),
+    # path('api/rest-auth/', include('rest_auth.urls')),
+    path('api/assignment/', include('assignment.urls')),
     path('api/ttAccount/', include('ttAccount.urls')),
     path('api/finance/', include('finance.urls')),
 
