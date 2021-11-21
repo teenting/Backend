@@ -20,8 +20,8 @@ child_detail = ChildInfoViewSet.as_view({
 
 urlpatterns = [
     
-    path('user/', user_info),
-    path('child/', child_list),
+    path('user', user_info),
+    path('child', child_list),
     path('child/<int:pk>', child_detail),
     path('login', LoginView.as_view()),
     path('logout', LogoutView.as_view()),

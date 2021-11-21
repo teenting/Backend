@@ -273,3 +273,100 @@ class ChildAnalysisView(APIView) :
             return HttpResponse(json.dumps(data), content_type="text/json-comment-filtered", status=status.HTTP_200_OK)
         else :
             return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class RemittanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+
+        user = User.objects.filter(username = self.request.user).first()
+        childid = self.request.query_params.get("childId", None)
+        if childid is not None:
+            child = Child.objects.filter(id=childid).first()
+        else:
+            return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+        url_drawing = "https://developers.nonghyup.com/DrawingTransfer.nh" # 출금 이체 url
+
+        apiNm = url_drawing[url_drawing.find(".com/")+5 : url_drawing.find(".nh")]
+        tsymd = datetime.today().strftime("%Y%m%d")
+        trtm = "112428"
+        iscd = user.iscd
+        fintechApsno = "001"
+        apiSvcCd = "ReceivedTransferA"
+        # isTuno =  임의번호로 채번
+        accessToken = user.accessToken
+        finAcno = user.finAcno
+        tram = self.request.POST['tram']
+        dractOtlt = child.lastname + child.firstname #출금인자내용
+
+        headers = {
+            "Content-Type": "application/json; chearset=utf-8",
+        }
+
+        body = {
+            "Header": {
+                "ApiNm": apiNm,
+                "Tsymd": tsymd,
+                "Trtm": trtm,
+                "Iscd": iscd,
+                "FintechApsno": fintechApsno,
+                "ApiSvcCd": apiSvcCd,
+                "IsTuno": "0007773" + str(random.randint(0,10000)), # isTuno
+                "AccessToken": accessToken
+            },
+            "FinAcno": finAcno,
+            "Tram" : tram,
+            "DractOtlt" : dractOtlt
+        }
+        res = requests.post(url_drawing, data=json.dumps(body), headers=headers)
+        if res.status_code == 200 :
+            #출금성공, 입금
+            url_receive = "https://developers.nonghyup.com/ReceivedTransferAccountNumber.nh" # 출금 이체 url
+
+            apiNm = url_receive[url_receive.find(".com/")+5 : url_receive.find(".nh")]
+            tsymd = datetime.today().strftime("%Y%m%d")
+            trtm = "112428"
+            iscd = child.iscd
+            fintechApsno = "001"
+            apiSvcCd = "ReceivedTransferA"
+            # isTuno =  임의번호로 채번
+            accessToken = child.accessToken
+            bncd = "011"
+            acno = child.acno
+            tram = self.request.POST['tram']
+            dractOtlt = child.lastname + child.firstname #출금인자내용
+            mractOtlt = user.username
+
+            headers = {
+                "Content-Type": "application/json; chearset=utf-8",
+            }
+
+            body = {
+                "Header": {
+                    "ApiNm": apiNm,
+                    "Tsymd": tsymd,
+                    "Trtm": trtm,
+                    "Iscd": iscd,
+                    "FintechApsno": fintechApsno,
+                    "ApiSvcCd": apiSvcCd,
+                    "IsTuno": "0007773" + str(random.randint(0,10000)), # isTuno
+                    "AccessToken": accessToken
+                },
+                "Bncd" : bncd,
+                "Acno" : acno,
+                "Tram" : tram,
+                "DractOtlt" : dractOtlt,
+                "MractOtlt" : mractOtlt
+            }
+            res = requests.post(url_receive, data=json.dumps(body), headers=headers)
+            if res.status_code == 200 :
+                return HttpResponse("remittance successed", status = status.HTTP_200_OK)
+            else:
+                return HttpResponse("drawed but not transferred error", res.status_code) #출금은 되었는데 입금이 안됨.... 나중에 핸들링 필요
+        else :
+            #출금실패
+            return HttpResponse("not drawed",res.status_code)
