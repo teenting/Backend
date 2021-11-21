@@ -18,5 +18,7 @@ urlpatterns = [
 
     path('analysis/', analysis_list),
     path('analysis/<int:pk>', analysis_detail),
-    path('balance', InquireBalanceView.as_view()), # 잔액조회
+    path('balance/', ParentBalanceView.as_view()), # 잔액조회 부모
+    path('balance/child', ChildBalanceView.as_view()), # 잔액조회 자녀
+    path('transaction/', ChildTransactionView.as_view()), # 거래내역조회 자녀
 ]
