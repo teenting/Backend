@@ -1,5 +1,6 @@
 from django.utils import datastructures
 from rest_framework import serializers, viewsets, authentication, status
+from rest_framework.exceptions import bad_request
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
@@ -16,31 +17,8 @@ from dateutil.relativedelta import relativedelta
 
 import random
 from django.http import HttpResponse
-from django.core import serializers
 
 # Create your views here.
-
-
-# 분석작업 기본적인 CRUD 구현 변경 많이많이 필요함
-class AnalysisViewSet(viewsets.ModelViewSet) :
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-
-    queryset = Analysis.objects.all()
-    serializer_class = AnalysisSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(child = self.request.user)
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        if self.request.user.is_authenticated :
-            qs = qs.filter(child = self.request.user)
-        else :
-            qs = qs.none()
-        return qs
 
 
 # 잔액조회 (부모)
@@ -229,3 +207,69 @@ class ChildTransactionView(APIView) :
 
         else :
             return HttpResponse(res.status_code)
+
+
+
+# 자녀 분석결과 조회
+class ChildAnalysisView(APIView) :
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    
+    def get(self, request):
+
+        # 프론트에 response로 줄 json data
+        data = {}
+        childId = self.request.query_params.get('childId')
+        child = Child.objects.filter(pk = childId).first()
+        period = self.request.query_params.get('period')
+
+        if not child :
+            return HttpResponse("You don't have such child", status=status.HTTP_400_BAD_REQUEST)
+
+
+        # 필터링할 날짜 범위 지정
+        if period == "week" :
+            start_date = datetime.now().date() + relativedelta(days=-7)
+        elif period == "month" :
+            start_date = datetime.now().date() + relativedelta(months=-1)
+        elif period == "semiannual" :
+            start_date = datetime.now().date() + relativedelta(months=-6)
+        elif period == "annual" :
+            start_date = datetime.now().date() + relativedelta(years=-1)
+        else : 
+            return HttpResponse("Period is uncorrect", status=status.HTTP_400_BAD_REQUEST)
+
+        spending = Analysis.objects.filter(child = child).filter(date__range = [start_date, datetime.now().date()])
+
+
+        # initializing
+        food = 0 # 0번 카테고리
+        transportation = 0 # 1번 카테고리
+        hobby = 0 # 2번 카테고리
+        etc = 0 # 3번 카테고리
+
+        for i in range(len(spending)) :
+            if spending[i].category == 0 :
+                food += spending[i].tram
+
+            elif spending[i].category ==  1 :
+                transportation += spending[i].tram
+
+            elif spending[i].category ==  2 :
+                hobby += spending[i].tram
+
+            elif spending[i].category ==  3 :
+                etc += spending[i].tram
+            
+        data["food"] = food
+        data["transportation"] = transportation
+        data["hobby"] = hobby
+        data["etc"] = etc
+        data["total"] = food + transportation + hobby + etc
+
+        if self.request.user.is_authenticated :
+            return HttpResponse(json.dumps(data), content_type="text/json-comment-filtered", status=status.HTTP_200_OK)
+        else :
+            return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
