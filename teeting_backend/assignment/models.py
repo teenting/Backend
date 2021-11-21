@@ -6,14 +6,19 @@ from datetime import datetime
 # Create your models here.
 
 class Mission(models.Model):
+    STATUS = (
+        (0, 'fail'), # 기한이 지나서 실패
+        (1, 'success'), # 미션 성공, 송금하지 않은 상태
+        (2, 'doing'), # 미션 진행중
+        (3, 'finished') # 성공 후 송금 완료
+    )
     parent = models.ForeignKey(User, on_delete=CASCADE, default=1)
     child = models.ForeignKey(Child, on_delete=CASCADE, related_name='mission', default=1)
     begDate = models.DateTimeField(default=datetime.now)
     expDate = models.DateTimeField(default=datetime.now)
-    isFinished = models.BooleanField(default=False)
+    status = models.IntegerField(default=2, choices=STATUS)
     content = models.CharField(max_length=200)
     reward = models.IntegerField()
-    isTransferred = models.BooleanField(default=False)
 
     def __str__(self):
         return self.content
@@ -35,4 +40,4 @@ class Achievement(models.Model):
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.child
+        return self.child.firstname + ' score'
