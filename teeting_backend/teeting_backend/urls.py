@@ -25,5 +25,7 @@ urlpatterns = [
     path('api-auth/', include("rest_framework.urls")),
     path('api/rest-auth/', include('rest_auth.urls')),
     path('assignment/', include('assignment.urls')),
+    path('api/ttAccount/', include('ttAccount.urls')),
+    path('api/finance/', include('finance.urls')),
 
 ]

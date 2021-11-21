@@ -1,19 +1,40 @@
-from django.shortcuts import render
-from .serializers import UserSerializer
-from .models import User
-from rest_framework import serializers, viewsets
-from rest_framework.views import APIView
-# Create your views here.
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
-class UserViewSet(viewsets.ModelViewSet):
-    qureyset = User.objects.all()
+from .models import *
+from .serializers import *
+
+class UserInfoViewSet(viewsets.ModelViewSet) :
+    
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return super().get_queryset()
+        qs = super().get_queryset()
 
-class UserChildView(APIView):
+        if self.request.user.is_authenticated :
+            qs = qs.filter(username = self.request.user)
+        else :
+            qs = qs.none()
+        return qs
 
-    def get(self, request):
-        user = User.objects.filter(user=self.request.user)
-        serializers = UserSerializer
+class ChildInfoViewSet(viewsets.ModelViewSet) :
+    
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    queryset = Child.objects.all()
+    serializer_class = ChildSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        if self.request.user.is_authenticated :
+            qs = qs.filter(parent = self.request.user)
+        else :
+            qs = qs.none()
+        return qs
