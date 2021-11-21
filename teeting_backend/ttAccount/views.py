@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import generics, viewsets
+from rest_framework import authentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
