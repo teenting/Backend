@@ -36,7 +36,7 @@ class Achievement(models.Model):
         (9, 'level9')
     )
     child = models.OneToOneField(Child, on_delete=CASCADE, related_name='achievement_child')
-    level = models.IntegerField(choices=LEVEL_CHOICES)
+    level = models.IntegerField(choices=LEVEL_CHOICES, default=1)
     score = models.IntegerField(default=0)
 
     def __str__(self):
