@@ -13,7 +13,7 @@ def update_achievement_score(sender, **kwargs):
     reward = kwargs['instance'].reward
     try:
         if status == 3:
-            Achievement.objects.filter(child_id=childid).update(score=F('score') + (reward * 0.1))
+            Achievement.objects.filter(child_id=childid).update(score=F('score') + (reward * 0.01))
     except:
         pass
 @receiver(post_save, sender=Achievement)
