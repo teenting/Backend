@@ -23,6 +23,7 @@ urlpatterns = [
     path('analysis', ChildAnalysisView.as_view()), # 자녀분석 조회 ?childId=<int>
     path('balance/', ParentBalanceView.as_view()), # 잔액조회 부모
     path('balance/child', ChildBalanceView.as_view()), # 잔액조회 자녀
-    path('transaction', ChildTransactionView.as_view()), # 거래내역조회 자녀 ?childId=<int>&period=<string>
+    # path('transaction', ChildTransactionView.as_view()), # 거래내역조회 자녀 부모 포함?childId=<int>&period=<string>
+    path('transaction', TransactionView.as_view()),
     path('remittance', RemittanceView.as_view()), #송금하기, ?childId=<int>
 ]
